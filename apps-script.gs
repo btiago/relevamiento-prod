@@ -12,7 +12,6 @@
 // ══════════════════════════════════════════════════════════════════════
 
 const SHEET_NAME = 'Relevamiento';
-const TURNSTILE_SECRET_KEY = '0x4AAAAAADGarXpvP1YxvR1zF8IMKuISrQ8'; // Cambiar por tu Secret Key real
 
 const HEADERS = [
   'ID', 'Fecha', 'Nombre del comercio', 'Titular', 'Rubro / Actividad',
@@ -44,42 +43,11 @@ function getSheet() {
   return sheet;
 }
 
-// ── Verificar Cloudflare Turnstile ───────────────────────────────────
-function verifyTurnstile(token) {
-  if (!token) return false;
-  
-  // Si usas las llaves de prueba, Cloudflare siempre devuelve éxito.
-  // Pero en producción, recordá poner las llaves reales en las constantes de arriba.
-  try {
-    const response = UrlFetchApp.fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      method: 'post',
-      payload: {
-        secret:   TURNSTILE_SECRET_KEY,
-        response: token
-      }
-    });
-    
-    const result = JSON.parse(response.getContentText());
-    if (!result.success) {
-      console.error('Turnstile Error:', result['error-codes']);
-    }
-    return result.success;
-  } catch (e) {
-    console.error('Error en fetch Turnstile:', e.toString());
-    return false;
-  }
-}
-
 // ── Recibir datos del formulario (POST) ──────────────────────────────
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
     
-    // Verificar token (si se envía en el JSON)
-    if (!verifyTurnstile(data.token)) {
-       throw new Error('Verificación anti-bots fallida');
-    }
-
     const sheet = getSheet();
 
     sheet.appendRow([
@@ -114,11 +82,6 @@ function doGet(e) {
   // Escritura: ?action=write&data={...}
   if (e.parameter && e.parameter.action === 'write') {
     try {
-      // Verificar token
-      if (!verifyTurnstile(e.parameter.token)) {
-         throw new Error('Verificación anti-bots fallida');
-      }
-
       const data  = JSON.parse(e.parameter.data);
       const sheet = getSheet();
 
