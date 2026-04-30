@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Relevamiento de Comercios – Municipalidad de Casilda</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <script src="config.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green-dark: #1a5c3a;
+      --green-mid:  #2e7d52;
+      --green-light:#e8f5ee;
+      --blue-accent:#1565c0;
+      --text:       #1a1a2e;
+      --muted:      #5a6270;
+      --border:     #c8d8ce;
+      --white:      #ffffff;
+      --shadow:     0 4px 24px rgba(30,94,60,.12);
+      --bg-grad-1:  #e8f5ee;
+      --bg-grad-2:  #dceeff;
+      --header-1:   #1a5c3a;
+      --header-2:   #0d3d2b;
+      --card-bg:    #ffffff;
+      --input-bg:   #f9fdfb;
+      --cond-bg:    #f4faf7;
+      --section-border: #e4ede8;
+    }
+
+    [data-theme="dark"] {
+      --green-dark: #3ea871;
+      --green-mid:  #2e7d52;
+      --green-light:#1f2937;
+      --blue-accent:#4da3ff;
+      --text:       #e5e7eb;
+      --muted:      #9ca3af;
+      --border:     #374151;
+      --white:      #111827;
+      --shadow:     0 4px 24px rgba(0,0,0,.4);
+      --bg-grad-1:  #0f172a;
+      --bg-grad-2:  #1e293b;
+      --header-1:   #0d3d2b;
+      --header-2:   #061b13;
+      --card-bg:    #111827;
+      --input-bg:   #1f2937;
+      --cond-bg:    #1e293b;
+      --section-border: #374151;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, var(--bg-grad-1) 0%, var(--bg-grad-2) 100%);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      color: var(--text);
+    }
+
+    .wrapper {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, var(--header-1) 0%, var(--header-2) 100%);
+      border-radius: 18px 18px 0 0;
+      padding: 2rem 2.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1.4rem;
+      position: relative;
+    }
+    .logo-wrap {
+      width: 72px; height: 72px;
+      background: #fff;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      padding: 6px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.2);
+    }
+    .logo-wrap svg { width: 100%; height: 100%; }
+    header h1 { font-size: 1.3rem; font-weight: 700; color: #fff; line-height: 1.3; }
+    header .sub1 { font-size: .88rem; color: rgba(255,255,255,.85); margin-top: .2rem; font-weight: 500; }
+    header .sub2 { font-size: .78rem; color: rgba(255,255,255,.6); margin-top: .1rem; }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--card-bg);
+      box-shadow: var(--shadow);
+      border-radius: 0 0 18px 18px;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    /* ── INTRO BAND ── */
+    .intro {
+      background: var(--green-light);
+      border-bottom: 1px solid var(--border);
+      padding: 1.2rem 2.5rem;
+      font-size: .88rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ── SECTIONS ── */
+    .section {
+      padding: 2rem 2.5rem;
+      border-bottom: 1px solid var(--section-border);
+    }
+    .section:last-child { border-bottom: none; }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--green-dark);
+      margin-bottom: 1.4rem;
+      padding-bottom: .5rem;
+      border-bottom: 2px solid var(--green-light);
+    }
+    .section-title .icon {
+      width: 28px; height: 28px;
+      background: var(--green-dark);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .85rem;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    /* ── FIELDS ── */
+    .field-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.1rem;
+    }
+    .field-grid .full { grid-column: 1 / -1; }
+
+    .field { display: flex; flex-direction: column; gap: .35rem; }
+    label { font-size: .8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="date"],
+    select,
+    textarea {
+      padding: .65rem .9rem;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      font-size: .95rem;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--input-bg);
+      transition: border-color .2s, box-shadow .2s;
+      width: 100%;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--green-mid);
+      box-shadow: 0 0 0 3px rgba(46,125,82,.13);
+      background: var(--card-bg);
+    }
+    textarea { resize: vertical; min-height: 70px; }
+
+    /* ── RADIO / CHECKBOX GROUP ── */
+    .question {
+      font-size: .95rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: .9rem;
+      line-height: 1.5;
+    }
+
+    .options { display: flex; flex-direction: column; gap: .55rem; margin-bottom: 1.2rem; }
+
+    .option-item {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      cursor: pointer;
+      padding: .55rem .9rem;
+      border-radius: 9px;
+      border: 1.5px solid var(--border);
+      transition: background .15s, border-color .15s;
+      font-size: .93rem;
+    }
+    .option-item:hover { background: var(--green-light); border-color: var(--green-mid); }
+    .option-item input[type="radio"],
+    .option-item input[type="checkbox"] {
+      width: 18px; height: 18px;
+      accent-color: var(--green-dark);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .option-item.selected {
+      background: var(--green-light);
+      border-color: var(--green-dark);
+    }
+
+    .conditional {
+      margin-top: .8rem;
+      padding: 1.2rem 1.5rem;
+      background: var(--cond-bg);
+      border-left: 3px solid var(--green-mid);
+      border-radius: 0 10px 10px 0;
+      display: none;
+    }
+    .conditional.visible { display: block; }
+    .conditional .sub-title {
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: .75rem;
+    }
+
+    /* ── OTRO FIELD ── */
+    .otro-field {
+      display: flex; align-items: center; gap: .6rem;
+    }
+    .otro-field input[type="text"] { flex: 1; }
+
+    /* ── SUBMIT ── */
+    .submit-wrap {
+      padding: 2rem 2.5rem;
+      background: var(--green-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .submit-wrap p { font-size: .82rem; color: var(--muted); }
+
+    button[type="submit"] {
+      background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+      color: #fff;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: .85rem 2.5rem;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(30,94,60,.3);
+      transition: transform .15s, box-shadow .15s;
+      letter-spacing: .02em;
+    }
+    button[type="submit"]:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(30,94,60,.4); }
+    button[type="submit"]:active { transform: none; }
+
+    /* ── SUCCESS ── */
+    #success-msg {
+      display: none;
+      background: #d4edda;
+      border: 1.5px solid #5cb85c;
+      color: #2d6a2d;
+      border-radius: 12px;
+      padding: 1.2rem 1.8rem;
+      margin-top: 1.5rem;
+      font-weight: 600;
+      text-align: center;
+      font-size: .97rem;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      header { padding: 1.4rem 1.2rem; }
+      .section { padding: 1.5rem 1.2rem; }
+      .field-grid { grid-template-columns: 1fr; }
+      .submit-wrap { flex-direction: column; text-align: center; }
+      button[type="submit"] { width: 100%; }
+    }
+
+    .theme-toggle {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: rgba(255,255,255,0.15);
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      transition: background 0.2s;
+    }
+    .theme-toggle:hover { background: rgba(255,255,255,0.25); }
+    .theme-toggle .sun-icon { display: none; }
+    .theme-toggle .moon-icon { display: block; }
+    [data-theme="dark"] .theme-toggle .sun-icon { display: block; }
+    [data-theme="dark"] .theme-toggle .moon-icon { display: none; }
+    @media (max-width: 600px) {
+      .theme-toggle { top: 1rem; right: 1rem; width: 34px; height: 34px; font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <header>
+    <button type="button" id="themeToggle" class="theme-toggle" aria-label="Cambiar modo oscuro">
+      <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+      <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    </button>
+    <script>
+      let turnstileWidgetId = null;
+
+      function renderTurnstile() {
+        if (window.turnstile) {
+          const theme = document.documentElement.getAttribute('data-theme') || 'light';
+          if (turnstileWidgetId !== null) {
+            turnstile.remove(turnstileWidgetId);
+          }
+          turnstileWidgetId = turnstile.render('#cf-widget', {
+            sitekey: CONFIG.TURNSTILE_SITE_KEY,
+            theme: theme,
+            callback: function(token) {
+              console.log('Turnstile token obtained');
+            },
+            'expired-callback': function() {
+              turnstile.reset(turnstileWidgetId);
+            }
+          });
+        }
+      }
+
+      window.onloadTurnstileCallback = function () {
+        renderTurnstile();
+      };
+    </script>
+    <div class="logo-wrap">
+      <img src="assets/logo.png" alt="Municipalidad de Casilda" style="width:100%;height:100%;object-fit:contain;"/>
+    </div>
+    <div>
+      <h1>Relevamiento Comercial Casilda</h1>
+      <p class="sub1">Municipalidad de Casilda · Área de Producción, Ciencia y Tecnología</p>
+    </div>
+  </header>
+
+  <div class="card">
+    <div class="intro">
+      <p>La Municipalidad de Casilda, a través del <strong>Área de Producción, Ciencia y Tecnología</strong>, está llevando adelante durante el mes de marzo de 2026 un relevamiento de comercios ubicados en el Centro, específicamente en las calles Buenos Aires, Bv. Lisandro de la Torre e Hipólito Irigoyen (ambas manos), desde Ov. Lagos a Bv. 25 de Mayo. El propósito de esta iniciativa es conocer sus necesidades, intereses y disposición para participar en acciones conjuntas de promoción, capacitación y comunicación.</p>
+      <p style="margin-top:.7rem; font-weight:600; color:#1a5c3a;">Agradecemos su predisposición y colaboración, para fortalecer el trabajo conjunto entre el Municipio y los comercios locales.</p>
+    </div>
+
+    <form id="mainForm" novalidate>
+
+      <!-- ══ SECCIÓN 1: DATOS DEL COMERCIO ══ -->
+      <div class="section">
+        <div class="section-title">
+          <div class="icon">🏪</div>
+          Datos del Comercio
+        </div>
+        <div class="field-grid">
+          <div class="field full">
+            <label for="nombre">Nombre del comercio *</label>
+            <input type="text" id="nombre" name="nombre" placeholder="Ej: Almacén El Sol" required/>
+          </div>
+          <div class="field full">
+            <label for="titular">Titular del comercio *</label>
+            <input type="text" id="titular" name="titular" placeholder="Nombre y apellido" required/>
+          </div>
+          <div class="field full">
+            <label for="rubro">Rubro / Actividad principal *</label>
+            <input type="text" id="rubro" name="rubro" placeholder="Ej: Gastronomía, Indumentaria, Ferretería…" required/>
+          </div>
+          <div class="field">
+            <label for="telefono">Teléfono de contacto *</label>
+            <input type="tel" id="telefono" name="telefono" placeholder="(03464) 4XXXXX" required/>
+          </div>
+          <div class="field">
+            <label for="email">Correo electrónico</label>
+            <input type="email" id="email" name="email" placeholder="ejemplo@correo.com"/>
+          </div>
+          <div class="field">
+            <label for="direccion">Dirección</label>
+            <input type="text" id="direccion" name="direccion" placeholder="Calle y número"/>
+          </div>
+          <div class="field">
+            <label for="barrio">Barrio</label>
+            <input type="text" id="barrio" name="barrio" placeholder="Nombre del barrio"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SECCIÓN 2: INTERÉS EN ACTIVIDADES ══ -->
+      <div class="section">
+        <div class="section-title">
+          <div class="icon">🤝</div>
+          Interés en Actividades Conjuntas con el Municipio
+        </div>
+        <p class="question">
+          ¿Le interesa participar en acciones de promoción de ventas y eventos organizados por el Municipio,
+          incluyendo actividades como cierre de calles para iniciativas comerciales?
+        </p>
+        <div class="options" id="actividadesOpts">
+          <label class="option-item">
+            <input type="radio" name="actividades" value="si" required/> Sí
+          </label>
+          <label class="option-item">
+            <input type="radio" name="actividades" value="no"/> No
+          </label>
+        </div>
+      </div>
+
+      <!-- ══ SECCIÓN 3: CAPACITACIONES ══ -->
+      <div class="section">
+        <div class="section-title">
+          <div class="icon">📚</div>
+          Capacitaciones
+        </div>
+        <p class="question">¿Le interesa participar en capacitaciones organizadas por el Municipio?</p>
+        <div class="options" id="capacitacionOpts">
+          <label class="option-item">
+            <input type="radio" name="capacitacion" value="si" id="capSi"/> Sí
+          </label>
+          <label class="option-item">
+            <input type="radio" name="capacitacion" value="no" id="capNo"/> No
+          </label>
+        </div>
+
+        <div class="conditional" id="tematicasBlock">
+          <div class="sub-title">En caso afirmativo, ¿qué temáticas le resultan más relevantes?</div>
+          <div class="options">
+            <label class="option-item">
+              <input type="checkbox" name="tematicas" value="marketing"/> Marketing digital y redes sociales
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="tematicas" value="ventas"/> Ventas y atención al cliente
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="tematicas" value="gestion"/> Gestión administrativa y financiera
+            </label>
+            <label class="option-item">
+              <input type="checkbox" name="tematicas" value="innovacion"/> Innovación y transformación digital
+            </label>
+<div class="option-item otro-field">
+              <input type="checkbox" name="tematicas" value="otro" id="chkOtro"/>
+              <span>Otro:</span>
+              <input type="text" id="otroTexto" name="otroTexto" placeholder="Especifique…" disabled/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ SECCIÓN 4: COMUNICACIÓN ══ -->
+      <div class="section">
+        <div class="section-title">
+          <div class="icon">💬</div>
+          Comunicación y Difusión
+        </div>
+        <p class="question">
+          ¿Le gustaría integrar un grupo de WhatsApp donde el Municipio comunique y publicite eventos comerciales?
+        </p>
+        <div class="options" id="whatsappOpts">
+          <label class="option-item">
+            <input type="radio" name="whatsapp" value="si"/> Sí
+          </label>
+          <label class="option-item">
+            <input type="radio" name="whatsapp" value="no"/> No
+          </label>
+        </div>
+      </div>
+
+      <!-- ══ SUBMIT ══ -->
+      <div class="submit-wrap">
+        <p>(*) Campos obligatorios. Los datos se guardan localmente.</p>
+        <div style="display:flex;gap:.8rem;flex-wrap:wrap;align-items:center;">
+          <a href="dashboard.html" target="_blank" style="font-size:.85rem;color:var(--green-dark);text-decoration:underline;font-weight:600;">📊 Ver estadísticas</a>
+          
+          <!-- Cloudflare Turnstile Widget -->
+          <div id="cf-widget"></div>
+          <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback" async defer></script>
+
+          <button type="submit" id="submitBtn">💾 Guardar formulario</button>
+        </div>
+      </div>
+
+    </form>
+
+    <div id="success-msg">
+      ✅ ¡Registro guardado correctamente! <a href="dashboard.html" target="_blank" style="color:#2d6a2d;font-weight:700;">Ver estadísticas →</a>
+    </div>
+  </div><!-- /.card -->
+
+</div><!-- /.wrapper -->
+
+<script>
+  // Highlight selected radio/checkbox parents
+  document.querySelectorAll('.option-item input').forEach(input => {
+    input.addEventListener('change', () => {
+      if (input.type === 'radio') {
+        const name = input.name;
+        document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+          r.closest('.option-item').classList.remove('selected');
+        });
+      }
+      if (input.checked) input.closest('.option-item').classList.add('selected');
+      else input.closest('.option-item').classList.remove('selected');
+    });
+  });
+
+  // Show/hide temáticas block
+  document.querySelectorAll('input[name="capacitacion"]').forEach(r => {
+    r.addEventListener('change', () => {
+      const block = document.getElementById('tematicasBlock');
+      block.classList.toggle('visible', r.value === 'si' && r.checked);
+    });
+  });
+
+  // Enable/disable "Otro" text field
+  document.getElementById('chkOtro').addEventListener('change', function () {
+    document.getElementById('otroTexto').disabled = !this.checked;
+    if (this.checked) document.getElementById('otroTexto').focus();
+  });
+
+  // Theme Toggle
+  const themeToggle = document.getElementById('themeToggle');
+  const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  if (savedTheme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+
+  themeToggle.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    renderTurnstile();
+  });
+
+  // Form submit → Google Sheets (con respaldo en localStorage)
+  document.getElementById('mainForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const nombre   = document.getElementById('nombre').value.trim();
+    const titular  = document.getElementById('titular').value.trim();
+    const rubro    = document.getElementById('rubro').value.trim();
+    const tel      = document.getElementById('telefono').value.trim();
+
+    if (!nombre || !titular || !rubro || !tel) {
+      alert('Por favor complete los campos obligatorios (*).'); return;
+    }
+
+    const tematicasChecked = [...document.querySelectorAll('input[name="tematicas"]:checked')]
+      .map(cb => cb.value === 'otro' ? (document.getElementById('otroTexto').value || 'Otro') : cb.value);
+
+    const registro = {
+      id:          Date.now(),
+      fecha:       new Date().toLocaleDateString('es-AR'),
+      nombre,
+      titular,
+      rubro,
+      telefono:    tel,
+      email:       document.getElementById('email').value.trim(),
+      direccion:   document.getElementById('direccion').value.trim(),
+      barrio:      document.getElementById('barrio').value.trim(),
+      actividades: document.querySelector('input[name="actividades"]:checked')?.value || '',
+      capacitacion:document.querySelector('input[name="capacitacion"]:checked')?.value || '',
+      tematicas:   tematicasChecked.join(', '),
+      whatsapp:    document.querySelector('input[name="whatsapp"]:checked')?.value || ''
+    };
+
+    // Verificar que el usuario configuró la URL
+    if (!CONFIG.SCRIPT_URL || CONFIG.SCRIPT_URL.includes('PEGAR')) {
+      alert('⚠️ Configurá la URL del Web App en config.js antes de guardar.');
+      return;
+    }
+
+    // Deshabilitar botón mientras se envía
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Guardando...';
+
+    try {
+      // Obtener el token de Turnstile
+      const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]')?.value;
+      if (!turnstileResponse) {
+        alert('⚠️ Por favor, completá la verificación anti-bots.');
+        btn.disabled = false;
+        btn.textContent = '💾 Guardar formulario';
+        return;
+      }
+
+      // Intentar envío con fetch (CORS puede ser un problema con Apps Script)
+      // Usamos un timeout para el fetch porque Apps Script a veces tarda en responder
+      const params = new URLSearchParams({
+        action: 'write',
+        data:   JSON.stringify(registro),
+        token:  turnstileResponse
+      });
+
+      const response = await fetch(`${CONFIG.SCRIPT_URL}?${params.toString()}`, {
+        method: 'GET'
+      });
+
+      const result = await response.json();
+
+      if (result.status === 'error') {
+        throw new Error(result.message || 'Error en el servidor');
+      }
+
+      // Guardar en localStorage como respaldo offline
+      const key  = 'relevamiento_comercios';
+      const prev = JSON.parse(localStorage.getItem(key) || '[]');
+      prev.push(registro);
+      localStorage.setItem(key, JSON.stringify(prev));
+
+      this.style.display = 'none';
+      document.getElementById('success-msg').style.display = 'block';
+
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = '💾 Guardar formulario';
+      
+      // Resetear Turnstile si hay error de verificación
+      if (window.turnstile && turnstileWidgetId !== null) {
+        turnstile.reset(turnstileWidgetId);
+      }
+
+      alert('❌ ' + err.message);
+      console.error(err);
+    }
+  });
+</script>
+</body>
+</html>

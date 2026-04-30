@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard – Relevamiento Comercial Casilda</title>
+  <link rel="icon" type="image/png" href="assets/favicon.png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green:  #2e8b57;
+      --dark:   #1a5c3a;
+      --blue:   #1565c0;
+      --yellow: #f5c200;
+      --bg:     #f0f6f2;
+      --white:  #ffffff;
+      --text:   #1a1a2e;
+      --muted:  #5a6270;
+      --border: #d4e6da;
+      --shadow: 0 4px 20px rgba(30,94,60,.1);
+      --topbar-1: #1a5c3a;
+      --topbar-2: #0d3d2b;
+      --card-bg: #ffffff;
+      --table-head: #f4faf7;
+      --table-hover: #f9fdfb;
+      --table-border: #eef4f0;
+      --chart-grid: #f0f0f0;
+    }
+
+    [data-theme="dark"] {
+      --green:  #3ea871;
+      --dark:   #4ade80; 
+      --blue:   #4da3ff;
+      --yellow: #fbbf24;
+      --bg:     #0f172a;
+      --white:  #111827;
+      --text:   #e5e7eb;
+      --muted:  #9ca3af;
+      --border: #374151;
+      --shadow: 0 4px 20px rgba(0,0,0,.4);
+      --topbar-1: #0d3d2b;
+      --topbar-2: #061b13;
+      --card-bg: #1e293b;
+      --table-head: #0f172a;
+      --table-hover: #1e293b;
+      --table-border: #374151;
+      --chart-grid: #374151;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      background: linear-gradient(135deg, var(--topbar-1), var(--topbar-2));
+      padding: 1rem 2rem;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 1rem; }
+    .topbar-logo { width: 48px; height: 48px; background: #fff; border-radius: 10px; padding: 4px; display:flex; align-items:center; justify-content:center; }
+    .topbar-logo img { width: 100%; height: 100%; object-fit: contain; }
+    .topbar h1 { color: #fff; font-size: 1.1rem; font-weight: 700; }
+    .topbar p  { color: rgba(255,255,255,.65); font-size: .78rem; margin-top: 2px; }
+    .topbar-actions { display: flex; gap: .7rem; flex-wrap: wrap; }
+
+    .btn {
+      padding: .6rem 1.3rem; border-radius: 9px; font-family: inherit; font-size: .88rem;
+      font-weight: 600; cursor: pointer; border: none; transition: all .15s; text-decoration: none;
+      display: inline-flex; align-items: center; gap: .4rem;
+    }
+    .btn-green   { background: var(--green); color: #fff; box-shadow: 0 2px 8px rgba(46,139,87,.35); }
+    .btn-green:hover { background: var(--dark); }
+    .btn-blue    { background: var(--blue); color: #fff; }
+    .btn-blue:hover  { background: #0d47a1; }
+    .btn-outline { background: rgba(255,255,255,.12); color: #fff; border: 1.5px solid rgba(255,255,255,.3); }
+    .btn-outline:hover { background: rgba(255,255,255,.22); }
+
+    /* ── BANNER CONFIGURACIÓN ── */
+    .config-banner {
+      background: #fff3cd; border-left: 4px solid #f5c200;
+      padding: 1rem 1.5rem; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    }
+    .config-banner p { font-size: .88rem; color: #7d5a00; flex: 1; }
+    .config-banner a { color: var(--blue); font-weight: 600; }
+
+    /* ── MAIN ── */
+    main { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    /* ── LOADING ── */
+    .loading { text-align: center; padding: 3rem; color: var(--muted); font-size: .95rem; }
+    .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--green); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 1rem; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── STAT CARDS ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: var(--white); border-radius: 14px; padding: 1.3rem 1.5rem; box-shadow: var(--shadow); border-left: 4px solid var(--green); }
+    .stat-card.blue   { border-left-color: var(--blue); }
+    .stat-card.yellow { border-left-color: var(--yellow); }
+    .stat-card.teal   { border-left-color: #00897b; }
+    .stat-value { font-size: 2.2rem; font-weight: 800; color: var(--dark); line-height: 1; }
+    .stat-label { font-size: .78rem; color: var(--muted); margin-top: .35rem; font-weight: 500; text-transform: uppercase; letter-spacing: .04em; }
+
+    /* ── CHARTS ── */
+    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-bottom: 2rem; }
+    @media(max-width:700px){ .charts-grid { grid-template-columns: 1fr; } }
+    .chart-card { background: var(--card-bg); border-radius: 14px; padding: 1.4rem 1.5rem; box-shadow: var(--shadow); }
+    .chart-title { font-size: .9rem; font-weight: 700; color: var(--dark); margin-bottom: 1rem; }
+    .chart-wrap  { position: relative; height: 240px; }
+
+    /* ── TABLE ── */
+    .table-card { background: var(--card-bg); border-radius: 14px; box-shadow: var(--shadow); overflow: hidden; margin-bottom: 2rem; }
+    .table-header { padding: 1.2rem 1.5rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: .8rem; }
+    .table-header h2 { font-size: 1rem; font-weight: 700; color: var(--dark); }
+    .table-search { padding: .5rem .9rem; border: 1.5px solid var(--border); border-radius: 8px; font-family: inherit; font-size: .88rem; width: 220px; background: var(--bg); color: var(--text); }
+    .table-search:focus { outline: none; border-color: var(--green); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .83rem; }
+    thead { background: var(--table-head); }
+    th { padding: .75rem 1rem; text-align: left; font-size: .74rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
+    td { padding: .7rem 1rem; border-top: 1px solid var(--table-border); color: var(--text); vertical-align: top; }
+    tr:hover td { background: var(--table-hover); }
+    .badge { display: inline-block; padding: .2rem .6rem; border-radius: 20px; font-size: .75rem; font-weight: 600; }
+    .badge-si  { background: #d4edda; color: #1a6b2a; }
+    .badge-no  { background: #fde8e8; color: #8b1a1a; }
+    .badge-tag { background: #e8f0ff; color: #1565c0; margin: 1px; display:inline-block; }
+
+    /* ── LAST UPDATE ── */
+    .last-update { font-size: .75rem; color: var(--muted); text-align: right; margin-bottom: 1rem; }
+
+    /* ── EMPTY ── */
+    .empty { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+    .empty .big { font-size: 3rem; }
+    .empty p { margin-top: .7rem; font-size: .95rem; }
+    .empty a { color: var(--green); font-weight: 600; }
+
+    .theme-toggle-btn {
+      background: rgba(255,255,255,0.15); border: none; font-size: 1.1rem; cursor: pointer; border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; color: #fff; transition: background 0.2s;
+    }
+    .theme-toggle-btn:hover { background: rgba(255,255,255,0.25); }
+    .theme-toggle-btn .sun-icon { display: none; }
+    .theme-toggle-btn .moon-icon { display: block; }
+    [data-theme="dark"] .theme-toggle-btn .sun-icon { display: block; }
+    [data-theme="dark"] .theme-toggle-btn .moon-icon { display: none; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-logo"><img src="assets/logo.png" alt="Casilda"/></div>
+    <div>
+      <h1>Dashboard – Relevamiento Comercial</h1>
+      <p>Municipalidad de Casilda · Área de Producción, Ciencia y Tecnología</p>
+    </div>
+  </div>
+  <div class="topbar-actions">
+    <button type="button" id="themeToggle" class="theme-toggle-btn" aria-label="Cambiar modo oscuro">
+      <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+      <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    </button>
+    <a href="index.html" class="btn btn-outline">➕ Nuevo registro</a>
+    <button class="btn btn-blue"  onclick="cargarDatos()">🔄 Actualizar</button>
+    <button class="btn btn-green" onclick="exportarExcel()">📥 Exportar Excel</button>
+  </div>
+</div>
+
+<!-- Banner si falta configurar -->
+<div class="config-banner" id="configBanner" style="display:none">
+  ⚠️ <p>El dashboard necesita la <strong>URL CSV de Google Sheets</strong> para mostrar datos. Seguí las <a href="#" onclick="alert('Completá CSV_URL en config.js con la URL de tu hoja publicada.')">instrucciones de configuración</a>.</p>
+</div>
+
+<main>
+
+  <div class="loading" id="loadingMsg">
+    <div class="spinner"></div>
+    Cargando datos desde Google Sheets…
+  </div>
+
+  <div id="dashboard" style="display:none">
+    <p class="last-update" id="lastUpdate"></p>
+
+    <!-- STAT CARDS -->
+    <div class="stats-grid" id="statsGrid"></div>
+
+    <!-- CHARTS -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">📢 Interés en actividades conjuntas</div>
+        <div class="chart-wrap"><canvas id="chartActividades"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">📚 Interés en capacitaciones</div>
+        <div class="chart-wrap"><canvas id="chartCapacitacion"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">🎯 Temáticas de capacitación preferidas</div>
+        <div class="chart-wrap"><canvas id="chartTematicas"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">💬 Integración a grupo de WhatsApp</div>
+        <div class="chart-wrap"><canvas id="chartWhatsapp"></canvas></div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+      <div class="table-header">
+        <h2>📋 Registros en Google Sheets</h2>
+        <input class="table-search" id="searchInput" type="text" placeholder="Buscar comercio…" oninput="filtrarTabla()"/>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Fecha</th><th>Nombre comercio</th><th>Titular</th><th>Rubro</th>
+              <th>Tel.</th><th>Barrio</th><th>Actividades</th><th>Capacitación</th><th>Temáticas</th><th>WhatsApp</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /#dashboard -->
+
+  <div class="empty" id="emptyMsg" style="display:none">
+    <div class="big">📭</div>
+    <p>Aún no hay registros en Google Sheets.<br/><a href="index.html">Cargar el primer formulario →</a></p>
+  </div>
+
+</main>
+
+<script>
+  // Theme Toggle (Early Execution)
+  const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  if (savedTheme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+
+  let allData = [];   // filas crudas (sin encabezado)
+  let charts  = {};
+
+  // ── Verificar config ─────────────────────────────────────────────────
+  function configOk() {
+    return CONFIG.CSV_URL && !CONFIG.CSV_URL.includes('PEGAR');
+  }
+
+  // ── Cargar datos desde Google Sheets CSV ─────────────────────────────
+  async function cargarDatos() {
+    if (!configOk()) {
+      document.getElementById('configBanner').style.display = 'flex';
+      document.getElementById('loadingMsg').style.display   = 'none';
+      document.getElementById('emptyMsg').style.display     = 'block';
+      return;
+    }
+
+    document.getElementById('loadingMsg').style.display  = 'block';
+    document.getElementById('dashboard').style.display   = 'none';
+    document.getElementById('emptyMsg').style.display    = 'none';
+
+    // Intentar desde Google Sheets CSV
+    try {
+      const url = CONFIG.CSV_URL + '&t=' + Date.now();
+      const res = await fetch(url);
+      const csv = await res.text();
+      const parsed = Papa.parse(csv, { header: true, skipEmptyLines: true });
+      // Solo usar si realmente trajo filas con datos
+      if (parsed.data && parsed.data.length > 0 && parsed.data[0]['Nombre del comercio'] !== undefined) {
+        allData = parsed.data;
+        mostrarDatos('Google Sheets ✅');
+        return;
+      }
+      console.warn('CSV descargado pero sin datos de la hoja Relevamiento. Usando datos locales.');
+    } catch (err) {
+      console.warn('No se pudo cargar desde Google Sheets. Usando datos locales.', err.message);
+    }
+
+    // Fallback: leer desde localStorage
+    const local = JSON.parse(localStorage.getItem('relevamiento_comercios') || '[]');
+    if (local.length) {
+      // Convertir formato localStorage → formato CSV (nombres de columna iguales al Apps Script)
+      allData = local.map(r => ({
+        'ID':                     r.id,
+        'Fecha':                  r.fecha,
+        'Nombre del comercio':    r.nombre,
+        'Titular':                r.titular,
+        'Rubro / Actividad':      r.rubro,
+        'Teléfono':               r.telefono,
+        'Email':                  r.email,
+        'Dirección':              r.direccion,
+        'Barrio':                 r.barrio,
+        'Actividades conjuntas':  r.actividades,
+        'Capacitaciones':         r.capacitacion,
+        'Temáticas':              r.tematicas,
+        'WhatsApp':               r.whatsapp
+      }));
+      mostrarDatos('datos locales (abrí desde un servidor para ver Google Sheets)');
+      return;
+    }
+
+    // Sin datos en ningún lado
+    document.getElementById('loadingMsg').style.display = 'none';
+    document.getElementById('emptyMsg').style.display   = 'block';
+  }
+
+  function mostrarDatos(fuente) {
+    document.getElementById('lastUpdate').textContent =
+      `Fuente: ${fuente} · Actualizado: ${new Date().toLocaleString('es-AR')}`;
+    renderStats(allData);
+    renderCharts(allData);
+    renderTabla(allData);
+    document.getElementById('loadingMsg').style.display = 'none';
+    document.getElementById('dashboard').style.display  = 'block';
+  }
+
+  // ── Estadísticas ─────────────────────────────────────────────────────
+  function renderStats(data) {
+    const total = data.length;
+    const col   = (field, val) => data.filter(r => (r[field]||'').toLowerCase() === val).length;
+    const actSi = col('Actividades conjuntas', 'si');
+    const capSi = col('Capacitaciones', 'si');
+    const waSi  = col('WhatsApp', 'si');
+
+    document.getElementById('statsGrid').innerHTML = `
+      <div class="stat-card">
+        <div class="stat-value">${total}</div>
+        <div class="stat-label">Comercios relevados</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-value">${total ? Math.round(actSi/total*100) : 0}%</div>
+        <div class="stat-label">Interés en actividades (${actSi})</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-value">${total ? Math.round(capSi/total*100) : 0}%</div>
+        <div class="stat-label">Interés en capacitaciones (${capSi})</div>
+      </div>
+      <div class="stat-card teal">
+        <div class="stat-value">${total ? Math.round(waSi/total*100) : 0}%</div>
+        <div class="stat-label">Se suman a WhatsApp (${waSi})</div>
+      </div>
+    `;
+  }
+
+  // ── Gráficos ─────────────────────────────────────────────────────────
+  function makeChart(id, type, labels, values, colors) {
+    if (charts[id]) charts[id].destroy();
+    const ctx = document.getElementById(id).getContext('2d');
+    
+    // Leer colores de grid y texto según el tema actual
+    const style = getComputedStyle(document.body);
+    const gridColor = style.getPropertyValue('--chart-grid').trim();
+    const textColor = style.getPropertyValue('--text').trim();
+
+    charts[id] = new Chart(ctx, {
+      type,
+      data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0, borderRadius: type === 'bar' ? 6 : 0 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { 
+          legend: { 
+            position: type === 'bar' ? 'bottom' : 'right', 
+            labels: { color: textColor, font: { size: 11, family:'Inter' }, boxWidth: 14 } 
+          } 
+        },
+        scales: type === 'bar'
+          ? { 
+              y: { beginAtZero: true, ticks: { stepSize: 1, color: textColor }, grid: { color: gridColor } }, 
+              x: { ticks: { color: textColor }, grid: { display:false } } 
+            }
+          : {}
+      }
+    });
+  }
+
+  function renderCharts(data) {
+    const col = (field, val) => data.filter(r => (r[field]||'').toLowerCase() === val).length;
+
+    makeChart('chartActividades','doughnut',['Sí','No','S/R'],
+      [col('Actividades conjuntas','si'), col('Actividades conjuntas','no'), data.filter(r=>!r['Actividades conjuntas']).length],
+      ['#2e8b57','#e74c3c','#ccc']);
+
+    makeChart('chartCapacitacion','doughnut',['Sí','No','S/R'],
+      [col('Capacitaciones','si'), col('Capacitaciones','no'), data.filter(r=>!r['Capacitaciones']).length],
+      ['#1565c0','#e74c3c','#ccc']);
+
+    // Temáticas
+    const tMap = {
+      marketing: 'Marketing digital', ventas: 'Ventas y atención',
+      gestion: 'Gestión admin.', innovacion: 'Innovación digital'
+    };
+    const tCounts = {};
+    data.forEach(r => {
+      const t = r['Temáticas'] || '';
+      if (!t) return;
+      t.split(',').forEach(tag => {
+        const k = tag.trim();
+        if (!k) return;
+        const label = tMap[k] || k;
+        tCounts[label] = (tCounts[label] || 0) + 1;
+      });
+    });
+    const tLabels = Object.keys(tCounts);
+    const tVals   = Object.values(tCounts);
+    makeChart('chartTematicas','bar',
+      tLabels.length ? tLabels : ['Sin datos'],
+      tLabels.length ? tVals  : [0],
+      ['#2e8b57','#1565c0','#f5c200','#e74c3c','#9b59b6','#e67e22']);
+
+    makeChart('chartWhatsapp','doughnut',['Sí','No','S/R'],
+      [col('WhatsApp','si'), col('WhatsApp','no'), data.filter(r=>!r['WhatsApp']).length],
+      ['#25d366','#e74c3c','#ccc']);
+  }
+
+  // ── Tabla ─────────────────────────────────────────────────────────────
+  function badge(val) {
+    if (!val) return '<span style="color:#bbb">—</span>';
+    return val.toLowerCase() === 'si'
+      ? '<span class="badge badge-si">Sí</span>'
+      : '<span class="badge badge-no">No</span>';
+  }
+
+  function renderTabla(data) {
+    const tbody = document.getElementById('tableBody');
+    if (!data.length) {
+      tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:2rem;color:#bbb;">Sin resultados</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = data.map((r, i) => {
+      const tags = (r['Temáticas'] || '')
+        ? r['Temáticas'].split(',').map(t => `<span class="badge badge-tag">${t.trim()}</span>`).join(' ')
+        : '—';
+      return `
+        <tr>
+          <td style="color:#aaa;font-size:.78rem;">${i+1}</td>
+          <td style="white-space:nowrap;">${r['Fecha'] || ''}</td>
+          <td><strong>${r['Nombre del comercio'] || ''}</strong></td>
+          <td>${r['Titular'] || ''}</td>
+          <td>${r['Rubro / Actividad'] || ''}</td>
+          <td>${r['Teléfono'] || ''}</td>
+          <td>${r['Barrio'] || '—'}</td>
+          <td>${badge(r['Actividades conjuntas'])}</td>
+          <td>${badge(r['Capacitaciones'])}</td>
+          <td style="max-width:200px;">${tags}</td>
+          <td>${badge(r['WhatsApp'])}</td>
+        </tr>`;
+    }).join('');
+  }
+
+  function filtrarTabla() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = q
+      ? allData.filter(r =>
+          (r['Nombre del comercio']||'').toLowerCase().includes(q) ||
+          (r['Titular']||'').toLowerCase().includes(q) ||
+          (r['Rubro / Actividad']||'').toLowerCase().includes(q))
+      : allData;
+    renderTabla(filtered);
+  }
+
+  // ── Exportar a Excel ──────────────────────────────────────────────────
+  function exportarExcel() {
+    if (!allData.length) { alert('No hay datos para exportar.'); return; }
+
+    const headers = Object.keys(allData[0]);
+    const rows    = allData.map(r => headers.map(h => r[h] || ''));
+    const ws      = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+    ws['!cols']   = headers.map(() => ({ wch: 20 }));
+
+    // Hoja resumen
+    const total = allData.length;
+    const col   = (field, val) => allData.filter(r => (r[field]||'').toLowerCase() === val).length;
+    const actSi = col('Actividades conjuntas','si');
+    const capSi = col('Capacitaciones','si');
+    const waSi  = col('WhatsApp','si');
+    const wsRes = XLSX.utils.aoa_to_sheet([
+      ['RESUMEN – Relevamiento Comercial Casilda'],
+      [],
+      ['Indicador','Cantidad','% sobre total'],
+      ['Total relevados', total, '100%'],
+      ['Interés en actividades (Sí)', actSi, total ? `${Math.round(actSi/total*100)}%` : '0%'],
+      ['Interés en capacitaciones (Sí)', capSi, total ? `${Math.round(capSi/total*100)}%` : '0%'],
+      ['Se suman a WhatsApp (Sí)', waSi, total ? `${Math.round(waSi/total*100)}%` : '0%'],
+    ]);
+    wsRes['!cols'] = [{ wch: 36 }, { wch: 12 }, { wch: 16 }];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Relevamiento');
+    XLSX.utils.book_append_sheet(wb, wsRes, 'Resumen');
+
+    const fecha = new Date().toLocaleDateString('es-AR').replace(/\//g,'-');
+    XLSX.writeFile(wb, `Relevamiento_Casilda_${fecha}.xlsx`);
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    if (allData.length) renderCharts(allData); // Re-render charts to update colors
+  });
+
+  cargarDatos();
+</script>
+</body>
+</html>
