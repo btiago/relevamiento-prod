@@ -476,16 +476,17 @@
       </div>
 
       <!-- ══ SUBMIT ══ -->
-      <div class="submit-wrap">
+      <div class="submit-wrap" style="align-items: flex-start;">
         <p>(*) Campos obligatorios. Los datos se guardan localmente.</p>
-        <div style="display:flex;gap:.8rem;flex-wrap:wrap;align-items:center;">
-          <a href="dashboard.html" target="_blank" style="font-size:.85rem;color:var(--green-dark);text-decoration:underline;font-weight:600;">📊 Ver estadísticas</a>
+        <div style="display:flex;flex-direction:column;gap:1rem;align-items:flex-end;">
+          <div style="display:flex;gap:.8rem;align-items:center;">
+            <a href="dashboard.html" target="_blank" style="font-size:.85rem;color:var(--green-dark);text-decoration:underline;font-weight:600;">📊 Ver estadísticas</a>
+            <button type="submit" id="submitBtn">💾 Guardar formulario</button>
+          </div>
           
           <!-- Cloudflare Turnstile Widget -->
           <div id="cf-widget"></div>
           <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback" async defer></script>
-
-          <button type="submit" id="submitBtn">💾 Guardar formulario</button>
         </div>
       </div>
 
