@@ -480,6 +480,11 @@
         <p>(*) Campos obligatorios. Los datos se guardan localmente.</p>
         <div style="display:flex;gap:.8rem;flex-wrap:wrap;align-items:center;">
           <a href="dashboard.html" target="_blank" style="font-size:.85rem;color:var(--green-dark);text-decoration:underline;font-weight:600;">📊 Ver estadísticas</a>
+          
+          <!-- Cloudflare Turnstile Widget -->
+          <div id="cf-widget"></div>
+          <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback" async defer></script>
+
           <button type="submit" id="submitBtn">💾 Guardar formulario</button>
         </div>
       </div>
@@ -532,6 +537,7 @@
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
+    renderTurnstile();
   });
 
   // Form submit → Google Sheets (con respaldo en localStorage)
@@ -577,15 +583,32 @@
     btn.textContent = '⏳ Guardando...';
 
     try {
-      // GET con parámetros: funciona correctamente con el redirect de Apps Script
+      // Obtener el token de Turnstile
+      const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]')?.value;
+      if (!turnstileResponse) {
+        alert('⚠️ Por favor, completá la verificación anti-bots.');
+        btn.disabled = false;
+        btn.textContent = '💾 Guardar formulario';
+        return;
+      }
+
+      // Intentar envío con fetch (CORS puede ser un problema con Apps Script)
+      // Usamos un timeout para el fetch porque Apps Script a veces tarda en responder
       const params = new URLSearchParams({
         action: 'write',
-        data:   JSON.stringify(registro)
+        data:   JSON.stringify(registro),
+        token:  turnstileResponse
       });
-      await fetch(`${CONFIG.SCRIPT_URL}?${params.toString()}`, {
-        method: 'GET',
-        mode:   'no-cors'
+
+      const response = await fetch(`${CONFIG.SCRIPT_URL}?${params.toString()}`, {
+        method: 'GET'
       });
+
+      const result = await response.json();
+
+      if (result.status === 'error') {
+        throw new Error(result.message || 'Error en el servidor');
+      }
 
       // Guardar en localStorage como respaldo offline
       const key  = 'relevamiento_comercios';
@@ -599,7 +622,13 @@
     } catch (err) {
       btn.disabled = false;
       btn.textContent = '💾 Guardar formulario';
-      alert('❌ Error al conectar con Google Sheets. Verificá tu conexión a internet y la URL en config.js.');
+      
+      // Resetear Turnstile si hay error de verificación
+      if (window.turnstile && turnstileWidgetId !== null) {
+        turnstile.reset(turnstileWidgetId);
+      }
+
+      alert('❌ ' + err.message);
       console.error(err);
     }
   });
