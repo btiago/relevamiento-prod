@@ -375,7 +375,72 @@
           </div>
           <div class="field full">
             <label for="rubro">Rubro / Actividad principal *</label>
-            <input type="text" id="rubro" name="rubro" placeholder="Ej: Gastronomía, Indumentaria, Ferretería…" required/>
+            <select id="rubro" name="rubro" required>
+              <option value="" disabled selected>— Seleccioná un rubro —</option>
+              <option value="agencia-viajes">Agencia de viajes y/o turismo</option>
+              <option value="almacen-kiosco">Almacén / Kiosco</option>
+              <option value="artículos-electricidad">Artículos de electricidad</option>
+              <option value="artículos-piletas">Artículos para piletas / venta de bombas de agua</option>
+              <option value="asoc-crediticia">Asoc. crediticia</option>
+              <option value="barbería-peluquería">Barbería / Peluquería</option>
+              <option value="bazar">Bazar</option>
+              <option value="bicicletería">Bicicletería</option>
+              <option value="cerrajería">Cerrajería</option>
+              <option value="centro-kinesiología">Centro de kinesiología y rehabilitación</option>
+              <option value="cooperativas">Cooperativas</option>
+              <option value="cotillón-repostería">Cotillón y/o repostería</option>
+              <option value="diseño-gráfico">Diseño gráfico</option>
+              <option value="empresa-tecnológica">Empresa tecnológica / Informática</option>
+              <option value="estéticas">Estéticas</option>
+              <option value="fabricación-uniformes">Fabricación de uniformes</option>
+              <option value="farmacia">Farmacia</option>
+              <option value="ferretería">Ferretería</option>
+              <option value="florería">Florería</option>
+              <option value="gastronomía">Gastronomía</option>
+              <option value="hotelería">Hotelería</option>
+              <option value="imprenta">Imprenta</option>
+              <option value="indumentaria">Indumentaria</option>
+              <option value="inmobiliaria">Inmobiliaria</option>
+              <option value="juguetería">Juguetería</option>
+              <option value="lavandería">Lavandería</option>
+              <option value="lencería">Lencería</option>
+              <option value="librería">Librería</option>
+              <option value="medicina-prepaga">Medicina prepaga / Obra social</option>
+              <option value="mercería">Mercería</option>
+              <option value="mueblería">Mueblería</option>
+              <option value="óptica">Óptica</option>
+              <option value="ortopedia">Ortopedia</option>
+              <option value="panificación">Panificación</option>
+              <option value="pañalera-ropa-bebe">Pañalera y/o ropa de bebé</option>
+              <option value="perfumería">Perfumería</option>
+              <option value="pet-shop">Pet-shop</option>
+              <option value="polirubro">Polirubro</option>
+              <option value="pollería-carnicería">Pollería / Carnicería</option>
+              <option value="productos-limpieza">Productos de limpieza</option>
+              <option value="productos-electrónicos">Productos electrónicos (venta)</option>
+              <option value="regalería-bijou">Regalería / Bijou</option>
+              <option value="relojería-joyería">Relojería / Joyería</option>
+              <option value="ropa-femenina">Ropa femenina</option>
+              <option value="sanitarios-construcción">Sanitarios / Construcción</option>
+              <option value="seguros">Seguros</option>
+              <option value="servicios-fotografía">Servicios de fotografía</option>
+              <option value="servicios-jurídicos">Servicios jurídicos</option>
+              <option value="servicios-técnicos">Servicios técnicos y accesorios</option>
+              <option value="supermercado">Supermercado</option>
+              <option value="venta-accesorios-autos">Venta de accesorios para autos</option>
+              <option value="venta-celulares">Venta de celulares y accesorios</option>
+              <option value="venta-electrodomésticos">Venta de electrodomésticos</option>
+              <option value="venta-motos">Venta de motos</option>
+              <option value="verdulería">Verdulería</option>
+              <option value="veterinaria">Veterinaria</option>
+              <option value="vivero">Vivero</option>
+              <option value="zapatería">Zapatería</option>
+              <option value="otros">OTROS</option>
+            </select>
+          </div>
+          <div class="field full" id="rubroOtrosWrap" style="display:none;">
+            <label for="rubroOtros">Especificá tu rubro *</label>
+            <input type="text" id="rubroOtros" name="rubroOtros" placeholder="Escribí el rubro de tu comercio…"/>
           </div>
           <div class="field">
             <label for="telefono">Teléfono de contacto *</label>
@@ -391,7 +456,25 @@
           </div>
           <div class="field">
             <label for="barrio">Barrio</label>
-            <input type="text" id="barrio" name="barrio" placeholder="Nombre del barrio"/>
+            <select id="barrio" name="barrio">
+              <option value="" disabled selected>— Seleccioná un barrio —</option>
+              <option value="Microcentro">Microcentro</option>
+              <option value="Centro">Centro</option>
+              <option value="Alberdi">Alberdi</option>
+              <option value="Barracas">Barracas</option>
+              <option value="Granaderos a Caballos">Granaderos a Caballos</option>
+              <option value="Nueva Roma A">Nueva Roma A</option>
+              <option value="Nueva Roma B">Nueva Roma B</option>
+              <option value="Nueva Roma C">Nueva Roma C</option>
+              <option value="Nueva Roma D">Nueva Roma D</option>
+              <option value="Nueva Roma E">Nueva Roma E</option>
+              <option value="Quintas">Quintas</option>
+              <option value="Parque Casado">Parque Casado</option>
+              <option value="Yapeyú">Yapeyú</option>
+              <option value="Timerman">Timerman</option>
+              <option value="San Carlos">San Carlos</option>
+              <option value="Zona Rural">Zona Rural</option>
+            </select>
           </div>
         </div>
       </div>
@@ -528,6 +611,21 @@
     if (this.checked) document.getElementById('otroTexto').focus();
   });
 
+  // Show/hide "OTROS" rubro text field
+  document.getElementById('rubro').addEventListener('change', function () {
+    const wrap = document.getElementById('rubroOtrosWrap');
+    const input = document.getElementById('rubroOtros');
+    if (this.value === 'otros') {
+      wrap.style.display = 'flex';
+      input.required = true;
+      input.focus();
+    } else {
+      wrap.style.display = 'none';
+      input.required = false;
+      input.value = '';
+    }
+  });
+
   // Theme Toggle
   const themeToggle = document.getElementById('themeToggle');
   const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
@@ -546,11 +644,16 @@
     e.preventDefault();
     const nombre   = document.getElementById('nombre').value.trim();
     const titular  = document.getElementById('titular').value.trim();
-    const rubro    = document.getElementById('rubro').value.trim();
+    const rubroSel = document.getElementById('rubro').value;
+    const rubroOtros = document.getElementById('rubroOtros').value.trim();
+    const rubro    = rubroSel === 'otros' ? (rubroOtros || 'Otros') : rubroSel;
     const tel      = document.getElementById('telefono').value.trim();
 
-    if (!nombre || !titular || !rubro || !tel) {
+    if (!nombre || !titular || !rubroSel || !tel) {
       alert('Por favor complete los campos obligatorios (*).'); return;
+    }
+    if (rubroSel === 'otros' && !rubroOtros) {
+      alert('Por favor especificá el rubro en el campo de texto.'); return;
     }
 
     const tematicasChecked = [...document.querySelectorAll('input[name="tematicas"]:checked')]
