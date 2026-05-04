@@ -216,7 +216,7 @@
           <thead>
             <tr>
               <th>#</th><th>Fecha</th><th>Nombre comercio</th><th>Titular</th><th>Rubro</th>
-              <th>Tel.</th><th>Barrio</th><th>Actividades</th><th>Capacitación</th><th>Temáticas</th><th>WhatsApp</th>
+              <th>Tel.</th><th>Dirección</th><th>Barrio</th><th>Actividades</th><th>Capacitación</th><th>Temáticas</th><th>WhatsApp</th>
             </tr>
           </thead>
           <tbody id="tableBody"></tbody>
@@ -423,7 +423,7 @@
   function renderTabla(data) {
     const tbody = document.getElementById('tableBody');
     if (!data.length) {
-      tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:2rem;color:#bbb;">Sin resultados</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:2rem;color:#bbb;">Sin resultados</td></tr>`;
       return;
     }
     tbody.innerHTML = data.map((r, i) => {
@@ -438,6 +438,7 @@
           <td>${r['Titular'] || ''}</td>
           <td>${r['Rubro / Actividad'] || ''}</td>
           <td>${r['Teléfono'] || ''}</td>
+          <td>${r['Dirección'] || '—'}</td>
           <td>${r['Barrio'] || '—'}</td>
           <td>${badge(r['Actividades conjuntas'])}</td>
           <td>${badge(r['Capacitaciones'])}</td>
